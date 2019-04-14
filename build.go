@@ -27,7 +27,6 @@ func build(cmd *cobra.Command, args []string) {
 	}
 	dir := usr.HomeDir + "/.recluse"
 	_, err = os.Stat(dir)
-
 	if os.IsNotExist(err) {
 		err = os.MkdirAll(dir+"/bin", os.ModePerm)
 		err = os.MkdirAll(dir+"/lib", os.ModePerm)
@@ -47,23 +46,7 @@ func build(cmd *cobra.Command, args []string) {
 	url := fmt.Sprintf("https://cmake.org/files/v%s/%s", major, filename)
 	_, err = os.Stat(filepath)
 	if os.IsNotExist(err) {
-		out, err := os.Create(filepath)
-		if err != nil {
-			panic(err)
-		}
-		defer out.Close()
-		resp, err := http.Get(url)
-		if err != nil {
-			panic(err)
-		}
-		defer resp.Body.Close()
-		if resp.StatusCode != http.StatusOK {
-			panic(fmt.Errorf("bad status: %s", resp.Status))
-		}
-		_, err = io.Copy(out, resp.Body)
-		if err != nil {
-			panic(err)
-		}
+		download(url, filepath)
 	} else if err != nil {
 		panic(err)
 	}
@@ -71,6 +54,35 @@ func build(cmd *cobra.Command, args []string) {
 	if err != nil {
 		panic(err)
 	}
+
+	//Dowload Nasm
+	url = "https://github.com/ExternalReality/recluse/raw/master/nasm"
+
+	err = download(url, dir+"/bin/nasm")
+	if err != nil {
+		panic(err)
+	}
+}
+
+func download(url, dst string) error {
+	out, err := os.Create(dst)
+	if err != nil {
+		panic(err)
+	}
+	defer out.Close()
+	resp, err := http.Get(url)
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		panic(fmt.Errorf("bad status: %s", resp.Status))
+	}
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	return nil
 }
 
 func untar(source, dst string) error {
