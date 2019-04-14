@@ -1,2 +1,2 @@
 # recluse
-Program to build and run Hermitux unikernels Linux binary executable
+Covenience program to build and run Hermitux unikernels
